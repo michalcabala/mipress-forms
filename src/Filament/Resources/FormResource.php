@@ -27,6 +27,7 @@ use MiPress\Forms\Filament\Resources\FormResource\Pages\CreateForm;
 use MiPress\Forms\Filament\Resources\FormResource\Pages\EditForm;
 use MiPress\Forms\Filament\Resources\FormResource\Pages\ListForms;
 use MiPress\Forms\Models\Form;
+use MiPress\Forms\Models\FormField;
 
 class FormResource extends Resource
 {
@@ -64,7 +65,14 @@ class FormResource extends Resource
                                 ->options([
                                     'none' => 'Prázdný formulář',
                                     'contact' => 'Kontaktní formulář',
-                                ]),
+                                ])
+                                ->live()
+                                ->afterStateUpdated(function (?string $state, callable $set): void {
+                                    $set('fields', match ($state) {
+                                        'contact' => FormField::contactTemplate(),
+                                        default => [],
+                                    });
+                                }),
                             Toggle::make('is_active')
                                 ->label('Aktivní')
                                 ->default(true),
