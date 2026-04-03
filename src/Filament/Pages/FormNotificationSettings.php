@@ -10,6 +10,7 @@ use Filament\Pages\Page;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use MiPress\Forms\Enums\FormNotificationPreference;
+use MiPress\Forms\Models\FormNotificationSetting;
 
 class FormNotificationSettings extends Page
 {
@@ -31,8 +32,19 @@ class FormNotificationSettings extends Page
     {
         $user = auth()->user();
 
-        $this->form_notification_preference = $user?->form_notification_preference
-            ?? FormNotificationPreference::Both->value;
+        if (! $user) {
+            $this->form_notification_preference = FormNotificationPreference::Both->value;
+
+            return;
+        }
+
+        $setting = FormNotificationSetting::query()
+            ->where('user_id', $user->getKey())
+            ->first();
+
+        $this->form_notification_preference = $setting?->preference instanceof FormNotificationPreference
+            ? $setting->preference->value
+            : FormNotificationPreference::Both->value;
     }
 
     public function form(Schema $schema): Schema
@@ -57,8 +69,10 @@ class FormNotificationSettings extends Page
             return;
         }
 
-        $user->form_notification_preference = $this->form_notification_preference;
-        $user->save();
+        FormNotificationSetting::query()->updateOrCreate(
+            ['user_id' => $user->getKey()],
+            ['preference' => $this->form_notification_preference ?? FormNotificationPreference::Both->value],
+        );
 
         Notification::make()
             ->title('Nastavení uloženo')

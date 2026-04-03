@@ -18,6 +18,7 @@ use MiPress\Forms\Http\Requests\SubmitFormRequest;
 use MiPress\Forms\Mail\FormAutoReply;
 use MiPress\Forms\Mail\FormSubmissionNotification;
 use MiPress\Forms\Models\Form;
+use MiPress\Forms\Models\FormNotificationSetting;
 use MiPress\Forms\Models\FormSubmission;
 use MiPress\Forms\Models\FormSubmissionAttachment;
 use MiPress\Forms\Notifications\NewFormSubmission;
@@ -58,14 +59,18 @@ class FormSubmissionController extends Controller
         $recipientUsers = $resolvedForm->recipientsQuery()->get();
 
         if ($recipientUsers->isNotEmpty()) {
-            $emailRecipients = $recipientUsers->filter(function ($user): bool {
-                $pref = $this->resolvePreference($user);
+            $preferencesByUserId = FormNotificationSetting::query()
+                ->whereIn('user_id', $recipientUsers->modelKeys())
+                ->pluck('preference', 'user_id');
+
+            $emailRecipients = $recipientUsers->filter(function ($user) use ($preferencesByUserId): bool {
+                $pref = $this->resolvePreference($preferencesByUserId->get($user->getKey()));
 
                 return $pref->wantsEmail();
             });
 
-            $databaseRecipients = $recipientUsers->filter(function ($user): bool {
-                $pref = $this->resolvePreference($user);
+            $databaseRecipients = $recipientUsers->filter(function ($user) use ($preferencesByUserId): bool {
+                $pref = $this->resolvePreference($preferencesByUserId->get($user->getKey()));
 
                 return $pref->wantsDatabase();
             });
@@ -141,10 +146,8 @@ class FormSubmissionController extends Controller
         }
     }
 
-    private function resolvePreference(object $user): FormNotificationPreference
+    private function resolvePreference(mixed $value): FormNotificationPreference
     {
-        $value = $user->form_notification_preference ?? null;
-
         if ($value instanceof FormNotificationPreference) {
             return $value;
         }
