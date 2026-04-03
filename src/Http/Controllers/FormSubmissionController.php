@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
+use MiPress\Forms\Enums\FormNotificationPreference;
 use MiPress\Forms\Http\Requests\SubmitFormRequest;
 use MiPress\Forms\Mail\FormAutoReply;
 use MiPress\Forms\Mail\FormSubmissionNotification;
@@ -57,8 +58,25 @@ class FormSubmissionController extends Controller
         $recipientUsers = $resolvedForm->recipientsQuery()->get();
 
         if ($recipientUsers->isNotEmpty()) {
-            Mail::to($recipientUsers)->queue(new FormSubmissionNotification($resolvedForm, $submission));
-            Notification::send($recipientUsers, new NewFormSubmission($submission));
+            $emailRecipients = $recipientUsers->filter(function ($user): bool {
+                $pref = $this->resolvePreference($user);
+
+                return $pref->wantsEmail();
+            });
+
+            $databaseRecipients = $recipientUsers->filter(function ($user): bool {
+                $pref = $this->resolvePreference($user);
+
+                return $pref->wantsDatabase();
+            });
+
+            if ($emailRecipients->isNotEmpty()) {
+                Mail::to($emailRecipients)->queue(new FormSubmissionNotification($resolvedForm, $submission));
+            }
+
+            if ($databaseRecipients->isNotEmpty()) {
+                Notification::send($databaseRecipients, new NewFormSubmission($submission));
+            }
         }
 
         if ((bool) $resolvedForm->auto_reply_enabled) {
@@ -121,5 +139,16 @@ class FormSubmissionController extends Controller
                 'size' => (int) $value->getSize(),
             ]);
         }
+    }
+
+    private function resolvePreference(object $user): FormNotificationPreference
+    {
+        $value = $user->form_notification_preference ?? null;
+
+        if ($value instanceof FormNotificationPreference) {
+            return $value;
+        }
+
+        return FormNotificationPreference::tryFrom((string) $value) ?? FormNotificationPreference::Both;
     }
 }

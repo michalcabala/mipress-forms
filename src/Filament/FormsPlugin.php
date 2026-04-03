@@ -6,6 +6,7 @@ namespace MiPress\Forms\Filament;
 
 use Filament\Contracts\Plugin;
 use Filament\Panel;
+use MiPress\Forms\Filament\Pages\FormNotificationSettings;
 use MiPress\Forms\Filament\Resources\FormResource;
 use MiPress\Forms\Filament\Resources\FormSubmissionResource;
 
@@ -26,6 +27,10 @@ class FormsPlugin implements Plugin
         $panel->resources([
             FormResource::class,
             FormSubmissionResource::class,
+        ]);
+
+        $panel->pages([
+            FormNotificationSettings::class,
         ]);
     }
 

@@ -35,7 +35,7 @@ class FormResource extends Resource
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-clipboard-document-list';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Obsah';
+    protected static string|\UnitEnum|null $navigationGroup = 'Formul\u00e1\u0159e';
 
     protected static ?string $modelLabel = 'Formulář';
 
