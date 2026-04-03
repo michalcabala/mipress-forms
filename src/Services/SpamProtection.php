@@ -7,8 +7,8 @@ namespace MiPress\Forms\Services;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\RateLimiter;
+use MiPress\Forms\Enums\SpamProtectionMode;
 use MiPress\Forms\Models\Form;
-use MiPress\Forms\Models\FormField;
 
 class SpamProtection
 {
@@ -18,13 +18,13 @@ class SpamProtection
             return true;
         }
 
-        $mode = (string) ($form->spam_protection ?? FormField::SPAM_HONEYPOT);
+        $mode = $form->spam_protection instanceof SpamProtectionMode
+            ? $form->spam_protection
+            : (SpamProtectionMode::tryFrom((string) $form->spam_protection) ?? SpamProtectionMode::Honeypot);
 
-        $honeypotSpam = in_array($mode, [FormField::SPAM_HONEYPOT, FormField::SPAM_BOTH], true)
-            && $this->isHoneypotSpam($request);
+        $honeypotSpam = $mode->usesHoneypot() && $this->isHoneypotSpam($request);
 
-        $recaptchaSpam = in_array($mode, [FormField::SPAM_RECAPTCHA, FormField::SPAM_BOTH], true)
-            && $this->isRecaptchaSpam($request, $form);
+        $recaptchaSpam = $mode->usesRecaptcha() && $this->isRecaptchaSpam($request, $form);
 
         return $honeypotSpam || $recaptchaSpam;
     }

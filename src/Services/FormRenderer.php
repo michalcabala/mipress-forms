@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace MiPress\Forms\Services;
 
 use Illuminate\Validation\Rule;
+use MiPress\Forms\Enums\FormFieldType;
 use MiPress\Forms\Models\Form;
-use MiPress\Forms\Models\FormField;
 
 class FormRenderer
 {
@@ -28,7 +28,7 @@ class FormRenderer
 
         foreach ($this->sortedFields($form) as $field) {
             $handle = (string) ($field['handle'] ?? '');
-            $type = (string) ($field['type'] ?? FormField::TYPE_TEXT);
+            $type = FormFieldType::tryFrom((string) ($field['type'] ?? '')) ?? FormFieldType::Text;
             $required = (bool) ($field['required'] ?? false);
             $config = (array) ($field['config'] ?? []);
 
@@ -39,19 +39,19 @@ class FormRenderer
             $definition = [$required ? 'required' : 'nullable'];
 
             match ($type) {
-                FormField::TYPE_EMAIL => $definition = [...$definition, 'email'],
-                FormField::TYPE_PHONE => $definition = [...$definition, 'string', 'max:50'],
-                FormField::TYPE_TEXTAREA => $definition = [...$definition, 'string'],
-                FormField::TYPE_CHECKBOX => $definition = [...$definition, 'boolean'],
-                FormField::TYPE_SELECT, FormField::TYPE_RADIO => $definition = [
+                FormFieldType::Email => $definition = [...$definition, 'email'],
+                FormFieldType::Phone => $definition = [...$definition, 'string', 'max:50'],
+                FormFieldType::Textarea => $definition = [...$definition, 'string'],
+                FormFieldType::Checkbox => $definition = [...$definition, 'boolean'],
+                FormFieldType::Select, FormFieldType::Radio => $definition = [
                     ...$definition,
                     Rule::in(array_keys((array) ($config['options'] ?? []))),
                 ],
-                FormField::TYPE_FILE => $definition = $this->fileRules($definition, $config),
+                FormFieldType::File => $definition = $this->fileRules($definition, $config),
                 default => $definition = [...$definition, 'string'],
             };
 
-            if ($type === FormField::TYPE_TEXT && filled($config['max_length'] ?? null)) {
+            if ($type === FormFieldType::Text && filled($config['max_length'] ?? null)) {
                 $definition[] = 'max:'.(int) $config['max_length'];
             }
 

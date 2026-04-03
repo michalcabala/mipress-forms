@@ -5,14 +5,17 @@ declare(strict_types=1);
 namespace MiPress\Forms\Models;
 
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use MiPress\Forms\Enums\SpamProtectionMode;
 
 class Form extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'forms';
 
@@ -36,7 +39,7 @@ class Form extends Model
         'fields' => '[]',
         'recipients' => '[]',
         'auto_reply_enabled' => false,
-        'success_message' => 'Dekuujeme, formular byl odeslan.',
+        'success_message' => 'Děkujeme, formulář byl odeslán.',
         'spam_protection' => 'honeypot',
         'is_active' => true,
     ];
@@ -46,6 +49,8 @@ class Form extends Model
         'recipients' => 'array',
         'auto_reply_enabled' => 'boolean',
         'is_active' => 'boolean',
+        'spam_protection' => SpamProtectionMode::class,
+        'recaptcha_secret_key' => 'encrypted',
     ];
 
     public function submissions(): HasMany
@@ -78,7 +83,7 @@ class Form extends Model
             ->all();
     }
 
-    public function recipientsQuery()
+    public function recipientsQuery(): Builder
     {
         return User::query()->whereKey($this->recipientIds());
     }

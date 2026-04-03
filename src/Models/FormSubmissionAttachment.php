@@ -7,10 +7,11 @@ namespace MiPress\Forms\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class FormSubmissionAttachment extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'form_submission_attachments';
 
@@ -21,6 +22,10 @@ class FormSubmissionAttachment extends Model
         'path',
         'mime_type',
         'size',
+    ];
+
+    protected $casts = [
+        'size' => 'integer',
     ];
 
     public function submission(): BelongsTo

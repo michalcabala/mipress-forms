@@ -17,7 +17,7 @@ class ViewFormSubmission extends ViewRecord
     {
         return [
             Action::make('markRead')
-                ->label('Oznacit jako prectene')
+                ->label('Označit jako přečtené')
                 ->visible(fn (): bool => ! $this->record->is_read)
                 ->action(function (): void {
                     $this->record->update([
@@ -27,7 +27,7 @@ class ViewFormSubmission extends ViewRecord
                     ]);
                 }),
             Action::make('markUnread')
-                ->label('Oznacit jako neprectene')
+                ->label('Označit jako nepřečtené')
                 ->visible(fn (): bool => (bool) $this->record->is_read)
                 ->action(function (): void {
                     $this->record->update([

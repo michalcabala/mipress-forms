@@ -16,29 +16,31 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
-use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 use MiPress\Core\Enums\UserRole;
+use MiPress\Forms\Enums\FormFieldType;
+use MiPress\Forms\Enums\SpamProtectionMode;
 use MiPress\Forms\Filament\Resources\FormResource\Pages\CreateForm;
 use MiPress\Forms\Filament\Resources\FormResource\Pages\EditForm;
 use MiPress\Forms\Filament\Resources\FormResource\Pages\ListForms;
 use MiPress\Forms\Models\Form;
-use MiPress\Forms\Models\FormField;
 
 class FormResource extends Resource
 {
     protected static ?string $model = Form::class;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-envelope';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-clipboard-document-list';
 
     protected static string|\UnitEnum|null $navigationGroup = 'Obsah';
 
-    protected static ?string $modelLabel = 'Formular';
+    protected static ?string $modelLabel = 'Formulář';
 
-    protected static ?string $pluralModelLabel = 'Formulare';
+    protected static ?string $pluralModelLabel = 'Formuláře';
+
+    protected static ?int $navigationSort = 30;
 
     public static function getEloquentQuery(): Builder
     {
@@ -50,24 +52,24 @@ class FormResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            Section::make('Zakladni nastaveni')
+            Section::make('Základní nastavení')
                 ->schema([
                     Grid::make(2)
                         ->schema([
                             Select::make('template')
-                                ->label('Zacit ze sablony')
+                                ->label('Začít ze šablony')
                                 ->visibleOn('create')
                                 ->dehydrated(false)
                                 ->default('none')
                                 ->options([
-                                    'none' => 'Prazdny formular',
-                                    'contact' => 'Kontaktni formular',
+                                    'none' => 'Prázdný formulář',
+                                    'contact' => 'Kontaktní formulář',
                                 ]),
                             Toggle::make('is_active')
-                                ->label('Aktivni')
+                                ->label('Aktivní')
                                 ->default(true),
                             TextInput::make('title')
-                                ->label('Nazev')
+                                ->label('Název')
                                 ->required()
                                 ->maxLength(255)
                                 ->live(onBlur: true)
@@ -91,7 +93,7 @@ class FormResource extends Resource
                         ->rows(3),
                 ]),
 
-            Section::make('Pole formulare')
+            Section::make('Pole formuláře')
                 ->schema([
                     Repeater::make('fields')
                         ->label('Pole')
@@ -102,55 +104,55 @@ class FormResource extends Resource
                                         ->label('Handle')
                                         ->required(),
                                     TextInput::make('label')
-                                        ->label('Label')
+                                        ->label('Popisek')
                                         ->required(),
                                     Select::make('type')
                                         ->label('Typ')
-                                        ->options(FormField::supportedTypes())
+                                        ->options(FormFieldType::options())
                                         ->live()
                                         ->required(),
                                     Toggle::make('required')
-                                        ->label('Povinne')
+                                        ->label('Povinné')
                                         ->default(false),
                                     TextInput::make('order')
-                                        ->label('Poradi')
+                                        ->label('Pořadí')
                                         ->numeric()
                                         ->default(0),
                                     TextInput::make('config.placeholder')
                                         ->label('Placeholder')
                                         ->visible(fn (Get $get): bool => in_array((string) $get('type'), [
-                                            FormField::TYPE_TEXT,
-                                            FormField::TYPE_EMAIL,
-                                            FormField::TYPE_PHONE,
-                                            FormField::TYPE_TEXTAREA,
-                                            FormField::TYPE_SELECT,
+                                            FormFieldType::Text->value,
+                                            FormFieldType::Email->value,
+                                            FormFieldType::Phone->value,
+                                            FormFieldType::Textarea->value,
+                                            FormFieldType::Select->value,
                                         ], true)),
                                     TextInput::make('config.max_length')
-                                        ->label('Max delka')
+                                        ->label('Max délka')
                                         ->numeric()
-                                        ->visible(fn (Get $get): bool => (string) $get('type') === FormField::TYPE_TEXT),
+                                        ->visible(fn (Get $get): bool => (string) $get('type') === FormFieldType::Text->value),
                                     TextInput::make('config.rows')
-                                        ->label('Pocet radku')
+                                        ->label('Počet řádků')
                                         ->numeric()
-                                        ->visible(fn (Get $get): bool => (string) $get('type') === FormField::TYPE_TEXTAREA),
+                                        ->visible(fn (Get $get): bool => (string) $get('type') === FormFieldType::Textarea->value),
                                     TextInput::make('config.max_size_mb')
                                         ->label('Max velikost (MB)')
                                         ->numeric()
-                                        ->visible(fn (Get $get): bool => (string) $get('type') === FormField::TYPE_FILE),
+                                        ->visible(fn (Get $get): bool => (string) $get('type') === FormFieldType::File->value),
                                     TextInput::make('config.accepted')
-                                        ->label('Povolene pripony')
+                                        ->label('Povolené přípony')
                                         ->helperText('.pdf,.jpg,.png')
-                                        ->visible(fn (Get $get): bool => (string) $get('type') === FormField::TYPE_FILE),
+                                        ->visible(fn (Get $get): bool => (string) $get('type') === FormFieldType::File->value),
                                     TextInput::make('config.value')
-                                        ->label('Skryta hodnota')
-                                        ->visible(fn (Get $get): bool => (string) $get('type') === FormField::TYPE_HIDDEN),
+                                        ->label('Skrytá hodnota')
+                                        ->visible(fn (Get $get): bool => (string) $get('type') === FormFieldType::Hidden->value),
                                     KeyValue::make('config.options')
-                                        ->label('Moznosti')
-                                        ->keyLabel('Klic')
-                                        ->valueLabel('Label')
+                                        ->label('Možnosti')
+                                        ->keyLabel('Klíč')
+                                        ->valueLabel('Popisek')
                                         ->visible(fn (Get $get): bool => in_array((string) $get('type'), [
-                                            FormField::TYPE_SELECT,
-                                            FormField::TYPE_RADIO,
+                                            FormFieldType::Select->value,
+                                            FormFieldType::Radio->value,
                                         ], true))
                                         ->columnSpanFull(),
                                 ]),
@@ -160,10 +162,10 @@ class FormResource extends Resource
                         ->columnSpanFull(),
                 ]),
 
-            Section::make('Prijemci')
+            Section::make('Příjemci')
                 ->schema([
                     Select::make('recipients')
-                        ->label('Upozornit uzivatele')
+                        ->label('Upozornit uživatele')
                         ->multiple()
                         ->searchable()
                         ->options(fn (): array => User::query()
@@ -180,46 +182,46 @@ class FormResource extends Resource
             Section::make('Ochrana proti spamu')
                 ->schema([
                     Select::make('spam_protection')
-                        ->label('Rezim')
-                        ->options(FormField::spamModes())
-                        ->default(FormField::SPAM_HONEYPOT)
+                        ->label('Režim')
+                        ->options(SpamProtectionMode::options())
+                        ->default(SpamProtectionMode::Honeypot->value)
                         ->live()
                         ->required(),
                     TextInput::make('recaptcha_site_key')
                         ->label('reCAPTCHA Site Key')
                         ->visible(fn (Get $get): bool => in_array((string) $get('spam_protection'), [
-                            FormField::SPAM_RECAPTCHA,
-                            FormField::SPAM_BOTH,
+                            SpamProtectionMode::Recaptcha->value,
+                            SpamProtectionMode::Both->value,
                         ], true)),
                     TextInput::make('recaptcha_secret_key')
                         ->label('reCAPTCHA Secret Key')
                         ->password()
                         ->revealable()
                         ->visible(fn (Get $get): bool => in_array((string) $get('spam_protection'), [
-                            FormField::SPAM_RECAPTCHA,
-                            FormField::SPAM_BOTH,
+                            SpamProtectionMode::Recaptcha->value,
+                            SpamProtectionMode::Both->value,
                         ], true)),
                 ]),
 
-            Section::make('Automaticka odpoved')
+            Section::make('Automatická odpověď')
                 ->schema([
                     Toggle::make('auto_reply_enabled')
                         ->label('Zapnout auto-reply')
                         ->live(),
                     TextInput::make('auto_reply_subject')
-                        ->label('Predmet')
+                        ->label('Předmět')
                         ->visible(fn (Get $get): bool => (bool) $get('auto_reply_enabled')),
                     Textarea::make('auto_reply_body')
-                        ->label('Text zpravy')
+                        ->label('Text zprávy')
                         ->rows(5)
                         ->visible(fn (Get $get): bool => (bool) $get('auto_reply_enabled')),
                 ]),
 
-            Section::make('Potvrzovaci zprava')
+            Section::make('Potvrzovací zpráva')
                 ->schema([
                     Textarea::make('success_message')
-                        ->label('Zprava po odeslani')
-                        ->default('Dekujeme, formular byl odeslan.')
+                        ->label('Zpráva po odeslání')
+                        ->default('Děkujeme, formulář byl odeslán.')
                         ->required(),
                 ]),
         ]);
@@ -229,19 +231,17 @@ class FormResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('title')->label('Nazev')->searchable(),
+                TextColumn::make('title')->label('Název')->searchable(),
                 TextColumn::make('handle')->label('Handle')->searchable(),
                 TextColumn::make('unread_submissions_count')
-                    ->label('Neprectene')
+                    ->label('Nepřečtené')
                     ->badge()
                     ->color('warning'),
-                BadgeColumn::make('is_active')
-                    ->label('Aktivni')
+                TextColumn::make('is_active')
+                    ->label('Aktivní')
+                    ->badge()
                     ->formatStateUsing(fn (bool $state): string => $state ? 'Ano' : 'Ne')
-                    ->colors([
-                        'success' => static fn (bool $state): bool => $state,
-                        'gray' => static fn (bool $state): bool => ! $state,
-                    ]),
+                    ->color(fn (bool $state): string => $state ? 'success' : 'gray'),
                 TextColumn::make('updated_at')->label('Upraveno')->since(),
             ]);
     }

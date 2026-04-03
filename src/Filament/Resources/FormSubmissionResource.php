@@ -14,7 +14,6 @@ use Filament\Forms\Components\Select;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -33,9 +32,11 @@ class FormSubmissionResource extends Resource
 
     protected static string|\UnitEnum|null $navigationGroup = 'Obsah';
 
-    protected static ?string $modelLabel = 'Odeslani formulare';
+    protected static ?string $modelLabel = 'Odeslání formuláře';
 
-    protected static ?string $pluralModelLabel = 'Odeslani formularu';
+    protected static ?string $pluralModelLabel = 'Odeslání formulářů';
+
+    protected static ?int $navigationSort = 31;
 
     public static function getEloquentQuery(): Builder
     {
@@ -63,7 +64,7 @@ class FormSubmissionResource extends Resource
     {
         return $schema->components([
             Select::make('form_id')
-                ->label('Formular')
+                ->label('Formulář')
                 ->options(Form::query()->orderBy('title')->pluck('title', 'id')->all())
                 ->disabled(),
         ]);
@@ -73,12 +74,12 @@ class FormSubmissionResource extends Resource
     {
         return $schema->components([
             TextEntry::make('form.title')
-                ->label('Formular'),
+                ->label('Formulář'),
             TextEntry::make('created_at')
-                ->label('Odeslano')
+                ->label('Odesláno')
                 ->since(),
             TextEntry::make('is_read')
-                ->label('Precitene')
+                ->label('Přečtené')
                 ->formatStateUsing(fn (bool $state): string => $state ? 'Ano' : 'Ne'),
             TextEntry::make('ip_address')
                 ->label('IP adresa')
@@ -94,7 +95,7 @@ class FormSubmissionResource extends Resource
                     ->implode("\n"))
                 ->columnSpanFull(),
             TextEntry::make('attachments_links')
-                ->label('Prilohy')
+                ->label('Přílohy')
                 ->state(fn (FormSubmission $record): string => $record->attachments
                     ->map(fn ($attachment): string => sprintf(
                         '<a href="%s" class="text-primary-600 underline">%s</a>',
@@ -111,17 +112,15 @@ class FormSubmissionResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('form.title')->label('Formular')->searchable(),
-                TextColumn::make('created_at')->label('Odeslano')->since(),
-                BadgeColumn::make('is_read')
-                    ->label('Precitene')
+                TextColumn::make('form.title')->label('Formulář')->searchable(),
+                TextColumn::make('created_at')->label('Odesláno')->since(),
+                TextColumn::make('is_read')
+                    ->label('Přečtené')
+                    ->badge()
                     ->formatStateUsing(fn (bool $state): string => $state ? 'Ano' : 'Ne')
-                    ->colors([
-                        'success' => static fn (bool $state): bool => $state,
-                        'warning' => static fn (bool $state): bool => ! $state,
-                    ]),
+                    ->color(fn (bool $state): string => $state ? 'success' : 'warning'),
                 TextColumn::make('summary')
-                    ->label('Shrnuti')
+                    ->label('Shrnutí')
                     ->state(fn (FormSubmission $record): string => collect($record->data ?? [])
                         ->take(3)
                         ->map(fn (mixed $value, string $key): string => sprintf('%s: %s', $key, is_scalar($value) ? (string) $value : '[...]'))
@@ -130,12 +129,12 @@ class FormSubmissionResource extends Resource
             ])
             ->filters([
                 SelectFilter::make('form_id')
-                    ->label('Formular')
+                    ->label('Formulář')
                     ->options(Form::query()->orderBy('title')->pluck('title', 'id')->all()),
             ])
             ->actions([
                 Action::make('markRead')
-                    ->label('Oznacit jako prectene')
+                    ->label('Označit jako přečtené')
                     ->visible(fn (FormSubmission $record): bool => ! $record->is_read)
                     ->action(function (FormSubmission $record): void {
                         $record->update([
@@ -145,7 +144,7 @@ class FormSubmissionResource extends Resource
                         ]);
                     }),
                 Action::make('markUnread')
-                    ->label('Oznacit jako neprectene')
+                    ->label('Označit jako nepřečtené')
                     ->visible(fn (FormSubmission $record): bool => $record->is_read)
                     ->action(function (FormSubmission $record): void {
                         $record->update([
@@ -159,15 +158,15 @@ class FormSubmissionResource extends Resource
             ->bulkActions([
                 BulkActionGroup::make([
                     BulkAction::make('markRead')
-                        ->label('Oznacit jako prectene')
+                        ->label('Označit jako přečtené')
                         ->action(function ($records): void {
-                            $records->each(function (FormSubmission $record): void {
-                                $record->update([
+                            FormSubmission::query()
+                                ->whereIn('id', $records->pluck('id'))
+                                ->update([
                                     'is_read' => true,
                                     'read_by' => auth()->id(),
                                     'read_at' => now(),
                                 ]);
-                            });
                         }),
                     DeleteBulkAction::make(),
                 ]),

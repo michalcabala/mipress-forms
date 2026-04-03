@@ -9,19 +9,24 @@
             ->where('is_active', true)
             ->first();
 
-        $requiresRecaptcha = in_array($resolvedForm?->spam_protection, ['recaptcha', 'both'], true)
-            && filled($resolvedForm?->recaptcha_site_key);
+        $requiresRecaptcha = $resolvedForm?->spam_protection instanceof \MiPress\Forms\Enums\SpamProtectionMode
+            ? $resolvedForm->spam_protection->usesRecaptcha() && filled($resolvedForm->recaptcha_site_key)
+            : in_array($resolvedForm?->spam_protection, ['recaptcha', 'both'], true) && filled($resolvedForm?->recaptcha_site_key);
     }
 @endphp
 
 @if (! $resolvedForm)
-    <p>Formular neni dostupny.</p>
+    <p>Formulář není dostupný.</p>
 @else
     @if ($errors->has('form'))
         <p>{{ $errors->first('form') }}</p>
     @endif
 
-    <form method="POST" action="{{ route('mipress.form.submit', ['form' => $resolvedForm->handle]) }}" enctype="multipart/form-data">
+    @if (session('mipress_form_success'))
+        <p>{{ session('mipress_form_success') }}</p>
+    @endif
+
+    <form method="POST" action="{{ route('mipress.form.submit', ['form' => $resolvedForm->handle]) }}" enctype="multipart/form-data" @if ($requiresRecaptcha) id="mipress-form-{{ $resolvedForm->handle }}" @endif>
         @csrf
 
         <input type="hidden" name="_form_started_at" value="{{ time() }}">
@@ -94,25 +99,34 @@
             <input type="hidden" id="mipress-forms-recaptcha-token-{{ $resolvedForm->handle }}" name="g-recaptcha-response" value="">
         @endif
 
-        @if (session('mipress_form_success'))
-            <p>{{ session('mipress_form_success') }}</p>
-        @endif
-
         <button type="submit">Odeslat</button>
     </form>
 
     @if ($requiresRecaptcha)
         <script src="https://www.google.com/recaptcha/api.js?render={{ $resolvedForm->recaptcha_site_key }}"></script>
         <script>
-            grecaptcha.ready(function () {
+            function mipressRefreshRecaptchaToken_{{ str_replace('-', '_', $resolvedForm->handle) }}() {
                 grecaptcha.execute('{{ $resolvedForm->recaptcha_site_key }}', { action: 'form_submit' }).then(function (token) {
-                    const input = document.getElementById('mipress-forms-recaptcha-token-{{ $resolvedForm->handle }}');
-
+                    var input = document.getElementById('mipress-forms-recaptcha-token-{{ $resolvedForm->handle }}');
                     if (input) {
                         input.value = token;
                     }
                 });
+            }
+
+            grecaptcha.ready(function () {
+                mipressRefreshRecaptchaToken_{{ str_replace('-', '_', $resolvedForm->handle) }}();
             });
+
+            var mipressForm_{{ str_replace('-', '_', $resolvedForm->handle) }} = document.getElementById('mipress-form-{{ $resolvedForm->handle }}');
+            if (mipressForm_{{ str_replace('-', '_', $resolvedForm->handle) }}) {
+                mipressForm_{{ str_replace('-', '_', $resolvedForm->handle) }}.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    var form = this;
+                    mipressRefreshRecaptchaToken_{{ str_replace('-', '_', $resolvedForm->handle) }}();
+                    setTimeout(function () { form.submit(); }, 300);
+                });
+            }
         </script>
     @endif
 @endif
