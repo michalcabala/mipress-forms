@@ -18,7 +18,7 @@ class FormBrick extends Brick
 
     public static function getLabel(): string
     {
-        return 'Formular';
+        return 'Formulář';
     }
 
     public static function getIcon(): string
@@ -39,7 +39,7 @@ class FormBrick extends Brick
             ->slideOver()
             ->schema([
                 Select::make('form_handle')
-                    ->label('Formular')
+                    ->label('Formulář')
                     ->options(fn (): array => Form::query()
                         ->where('is_active', true)
                         ->orderBy('title')

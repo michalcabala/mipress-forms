@@ -85,7 +85,7 @@ class FormSubmissionResource extends Resource
                 ->label('IP adresa')
                 ->placeholder('-'),
             TextEntry::make('user_agent')
-                ->label('User agent')
+                ->label('Uživatelský agent')
                 ->placeholder('-')
                 ->columnSpanFull(),
             TextEntry::make('submission_data')

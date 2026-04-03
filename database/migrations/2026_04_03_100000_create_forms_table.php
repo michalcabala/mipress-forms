@@ -20,7 +20,7 @@ return new class extends Migration
             $table->boolean('auto_reply_enabled')->default(false);
             $table->string('auto_reply_subject')->nullable();
             $table->text('auto_reply_body')->nullable();
-            $table->string('success_message')->default('Dekuujeme, formular byl odeslan.');
+            $table->string('success_message')->default('Děkujeme, formulář byl odeslán.');
             $table->string('spam_protection')->default('honeypot');
             $table->string('recaptcha_site_key')->nullable();
             $table->string('recaptcha_secret_key')->nullable();

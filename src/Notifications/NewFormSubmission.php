@@ -32,11 +32,11 @@ class NewFormSubmission extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         return FilamentNotification::make()
-            ->title('Nove odeslani formulare')
-            ->body('Formular: '.$this->submission->form?->title)
+            ->title('Nové odeslání formuláře')
+            ->body('Formulář: '.$this->submission->form?->title)
             ->actions([
                 Action::make('open')
-                    ->label('Otevrit')
+                    ->label('Otevřít')
                     ->url(FormSubmissionResource::getUrl('view', ['record' => $this->submission]))
                     ->markAsRead(),
             ])

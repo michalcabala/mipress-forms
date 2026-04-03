@@ -38,7 +38,7 @@ class FormSubmissionController extends Controller
         abort_unless($resolvedForm->is_active, 404);
 
         if ($spamProtection->check($request, $resolvedForm)) {
-            return back()->withErrors(['form' => 'Formular nebylo mozne odeslat.']);
+            return back()->withErrors(['form' => 'Formulář nebylo možné odeslat.']);
         }
 
         $validated = validator($request->all(), $renderer->rules($resolvedForm))->validate();

@@ -1,4 +1,4 @@
-<h1>Nove odeslani formulare: {{ $form->title }}</h1>
+<h1>Nové odeslání formuláře: {{ $form->title }}</h1>
 
 @php
     $labels = collect($form->fields ?? [])->mapWithKeys(fn ($field) => [($field['handle'] ?? '') => ($field['label'] ?? $field['handle'] ?? '')]);

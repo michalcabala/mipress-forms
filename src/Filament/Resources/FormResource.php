@@ -89,7 +89,7 @@ class FormResource extends Resource
                                     $set('handle', Str::slug($state));
                                 }),
                             TextInput::make('handle')
-                                ->label('Handle')
+                                ->label('Identifikátor')
                                 ->required()
                                 ->maxLength(255)
                                 ->unique(ignoreRecord: true)
@@ -109,7 +109,7 @@ class FormResource extends Resource
                             Grid::make(2)
                                 ->schema([
                                     TextInput::make('handle')
-                                        ->label('Handle')
+                                        ->label('Identifikátor')
                                         ->required(),
                                     TextInput::make('label')
                                         ->label('Popisek')
@@ -127,7 +127,7 @@ class FormResource extends Resource
                                         ->numeric()
                                         ->default(0),
                                     TextInput::make('config.placeholder')
-                                        ->label('Placeholder')
+                                        ->label('Zástupný text')
                                         ->visible(fn (Get $get): bool => in_array((string) $get('type'), [
                                             FormFieldType::Text->value,
                                             FormFieldType::Email->value,
@@ -196,13 +196,13 @@ class FormResource extends Resource
                         ->live()
                         ->required(),
                     TextInput::make('recaptcha_site_key')
-                        ->label('reCAPTCHA Site Key')
+                        ->label('reCAPTCHA veřejný klíč')
                         ->visible(fn (Get $get): bool => in_array((string) $get('spam_protection'), [
                             SpamProtectionMode::Recaptcha->value,
                             SpamProtectionMode::Both->value,
                         ], true)),
                     TextInput::make('recaptcha_secret_key')
-                        ->label('reCAPTCHA Secret Key')
+                        ->label('reCAPTCHA tajný klíč')
                         ->password()
                         ->revealable()
                         ->visible(fn (Get $get): bool => in_array((string) $get('spam_protection'), [
@@ -214,7 +214,7 @@ class FormResource extends Resource
             Section::make('Automatická odpověď')
                 ->schema([
                     Toggle::make('auto_reply_enabled')
-                        ->label('Zapnout auto-reply')
+                        ->label('Zapnout automatickou odpověď')
                         ->live(),
                     TextInput::make('auto_reply_subject')
                         ->label('Předmět')
@@ -240,7 +240,7 @@ class FormResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('title')->label('Název')->searchable(),
-                TextColumn::make('handle')->label('Handle')->searchable(),
+                TextColumn::make('handle')->label('Identifikátor')->searchable(),
                 TextColumn::make('unread_submissions_count')
                     ->label('Nepřečtené')
                     ->badge()

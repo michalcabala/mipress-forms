@@ -25,7 +25,7 @@ class FormSubmissionNotification extends Mailable
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: 'Nove odeslani: '.$this->form->title);
+        return new Envelope(subject: 'Nové odeslání: '.$this->form->title);
     }
 
     public function content(): Content

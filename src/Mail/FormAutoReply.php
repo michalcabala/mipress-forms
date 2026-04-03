@@ -23,7 +23,7 @@ class FormAutoReply extends Mailable
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: (string) ($this->form->auto_reply_subject ?: 'Dekuujeme za zpravu'));
+        return new Envelope(subject: (string) ($this->form->auto_reply_subject ?: 'Děkujeme za zprávu'));
     }
 
     public function content(): Content
