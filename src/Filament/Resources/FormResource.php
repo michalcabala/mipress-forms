@@ -260,7 +260,12 @@ class FormResource extends Resource
                     ->badge()
                     ->formatStateUsing(fn (bool $state): string => $state ? 'Ano' : 'Ne')
                     ->color(fn (bool $state): string => $state ? 'success' : 'gray'),
-                TextColumn::make('updated_at')->label('Upraveno')->isoDateTime('LLL'),
+                TextColumn::make('updated_at')
+                    ->label('Datum')
+                    ->isoDateTime('LLL')
+                    ->description(fn ($record): ?string => filled($record->created_at) && filled($record->updated_at) && $record->updated_at->gt($record->created_at)
+                        ? 'Vytvořeno ' . $record->created_at->isoFormat('LLL')
+                        : null),
             ])
             ->actions([
                 EditAction::make(),
