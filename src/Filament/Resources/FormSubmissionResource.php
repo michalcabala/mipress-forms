@@ -33,9 +33,9 @@ class FormSubmissionResource extends Resource
 
     protected static ?string $cluster = FormsCluster::class;
 
-    protected static ?string $modelLabel = 'Odeslání formuláře';
+    protected static ?string $modelLabel = 'Odeslaná zpráva';
 
-    protected static ?string $pluralModelLabel = 'Odeslání formulářů';
+    protected static ?string $pluralModelLabel = 'Odeslané zprávy';
 
     protected static ?int $navigationSort = 31;
 
@@ -58,7 +58,7 @@ class FormSubmissionResource extends Resource
 
     public static function getNavigationBadgeTooltip(): ?string
     {
-        return 'Nepřečtená odeslání';
+        return 'Nepřečtené zprávy';
     }
 
     public static function getUnreadSubmissionsCount(): int
@@ -114,7 +114,7 @@ class FormSubmissionResource extends Resource
     {
         return $schema->components([
             Select::make('form_id')
-                ->label('Formulář')
+                ->label('Zdrojový formulář')
                 ->options(Form::query()->orderBy('title')->pluck('title', 'id')->all())
                 ->disabled(),
         ]);
@@ -124,13 +124,13 @@ class FormSubmissionResource extends Resource
     {
         return $schema->components([
             TextEntry::make('form.title')
-                ->label('Formulář'),
+                ->label('Zdrojový formulář'),
             TextEntry::make('created_at')
-                ->label('Odesláno')
+                ->label('Přijato')
                 ->since(),
             TextEntry::make('is_read')
-                ->label('Přečtené')
-                ->formatStateUsing(fn (bool $state): string => $state ? 'Ano' : 'Ne'),
+                ->label('Stav')
+                ->formatStateUsing(fn (bool $state): string => $state ? 'Přečteno' : 'Nepřečteno'),
             TextEntry::make('ip_address')
                 ->label('IP adresa')
                 ->placeholder('-'),
@@ -139,7 +139,7 @@ class FormSubmissionResource extends Resource
                 ->placeholder('-')
                 ->columnSpanFull(),
             TextEntry::make('submission_data')
-                ->label('Data')
+                ->label('Obsah zprávy')
                 ->state(fn (FormSubmission $record): string => collect($record->data ?? [])
                     ->map(fn (mixed $value, string $key): string => sprintf('%s: %s', $key, is_scalar($value) ? (string) $value : json_encode($value)))
                     ->implode("\n"))
@@ -162,15 +162,15 @@ class FormSubmissionResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('form.title')->label('Formulář')->searchable(),
-                TextColumn::make('created_at')->label('Odesláno')->since(),
+                TextColumn::make('form.title')->label('Zdrojový formulář')->searchable(),
+                TextColumn::make('created_at')->label('Přijato')->since(),
                 TextColumn::make('is_read')
-                    ->label('Přečtené')
+                    ->label('Stav')
                     ->badge()
-                    ->formatStateUsing(fn (bool $state): string => $state ? 'Ano' : 'Ne')
+                    ->formatStateUsing(fn (bool $state): string => $state ? 'Přečteno' : 'Nepřečteno')
                     ->color(fn (bool $state): string => $state ? 'success' : 'warning'),
                 TextColumn::make('summary')
-                    ->label('Shrnutí')
+                    ->label('Náhled zprávy')
                     ->state(fn (FormSubmission $record): string => collect($record->data ?? [])
                         ->take(3)
                         ->map(fn (mixed $value, string $key): string => sprintf('%s: %s', $key, is_scalar($value) ? (string) $value : '[...]'))
@@ -179,7 +179,7 @@ class FormSubmissionResource extends Resource
             ])
             ->filters([
                 SelectFilter::make('form_id')
-                    ->label('Formulář')
+                    ->label('Zdrojový formulář')
                     ->options(Form::query()->orderBy('title')->pluck('title', 'id')->all()),
             ])
             ->actions([

@@ -19,9 +19,9 @@ class FormNotificationSettings extends Page
 
     protected static ?string $cluster = FormsCluster::class;
 
-    protected static ?string $navigationLabel = 'Nastavení upozornění';
+    protected static ?string $navigationLabel = 'Notifikace';
 
-    protected static ?string $title = 'Nastavení upozornění na formuláře';
+    protected static ?string $title = 'Notifikace formulářů';
 
     protected static ?int $navigationSort = 40;
 
@@ -56,8 +56,8 @@ class FormNotificationSettings extends Page
     public function form(Schema $schema): Schema
     {
         return $schema->components([
-            Section::make('Upozornění na odeslané formuláře')
-                ->description('Zvolte, jakým způsobem chcete dostávat upozornění na nová odeslání formulářů.')
+            Section::make('Upozornění na nové zprávy')
+                ->description('Zvolte, jak chcete dostávat upozornění na nově odeslané zprávy z formulářů.')
                 ->schema([
                     Select::make('form_notification_preference')
                         ->label('Způsob upozornění')

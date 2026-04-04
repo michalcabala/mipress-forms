@@ -248,7 +248,7 @@ class FormResource extends Resource
                 TextColumn::make('title')->label('Název')->searchable(),
                 TextColumn::make('handle')->label('Identifikátor')->searchable(),
                 TextColumn::make('unread_submissions_count')
-                    ->label('Nepřečtené')
+                    ->label('Nepřečtené zprávy')
                     ->badge()
                     ->color('warning'),
                 TextColumn::make('is_active')

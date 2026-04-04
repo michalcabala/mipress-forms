@@ -38,6 +38,6 @@ class FormsCluster extends Cluster
 
     public static function getNavigationBadgeTooltip(): ?string
     {
-        return 'Nepřečtená odeslání';
+        return 'Nepřečtené zprávy';
     }
 }
