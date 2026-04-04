@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MiPress\Forms\Filament\Resources;
 
 use App\Models\User;
+use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
@@ -17,6 +18,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use MiPress\Core\Enums\UserRole;
 use MiPress\Forms\Filament\Clusters\FormsCluster;
@@ -29,7 +31,7 @@ class FormSubmissionResource extends Resource
 {
     protected static ?string $model = FormSubmission::class;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-inbox-stack';
+    protected static string|\BackedEnum|null $navigationIcon = 'fal-mailbox';
 
     protected static ?string $cluster = FormsCluster::class;
 
@@ -140,9 +142,8 @@ class FormSubmissionResource extends Resource
                 ->columnSpanFull(),
             TextEntry::make('submission_data')
                 ->label('Obsah zprávy')
-                ->state(fn (FormSubmission $record): string => collect($record->data ?? [])
-                    ->map(fn (mixed $value, string $key): string => sprintf('%s: %s', $key, is_scalar($value) ? (string) $value : json_encode($value)))
-                    ->implode("\n"))
+                ->state(fn (FormSubmission $record): string => static::formatSubmissionDataAsHtml($record))
+                ->html()
                 ->columnSpanFull(),
             TextEntry::make('attachments_links')
                 ->label('Přílohy')
@@ -171,10 +172,8 @@ class FormSubmissionResource extends Resource
                     ->color(fn (bool $state): string => $state ? 'success' : 'warning'),
                 TextColumn::make('summary')
                     ->label('Náhled zprávy')
-                    ->state(fn (FormSubmission $record): string => collect($record->data ?? [])
-                        ->take(3)
-                        ->map(fn (mixed $value, string $key): string => sprintf('%s: %s', $key, is_scalar($value) ? (string) $value : '[...]'))
-                        ->implode(' | '))
+                    ->state(fn (FormSubmission $record): string => static::formatSubmissionPreviewAsHtml($record))
+                    ->html()
                     ->wrap(),
             ])
             ->filters([
@@ -229,5 +228,91 @@ class FormSubmissionResource extends Resource
             'index' => ListFormSubmissions::route('/'),
             'view' => ViewFormSubmission::route('/{record}'),
         ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected static function getSubmissionFieldLabels(FormSubmission $record): array
+    {
+        return collect($record->form?->fields ?? [])
+            ->mapWithKeys(function (array $field): array {
+                $handle = (string) ($field['handle'] ?? '');
+
+                if ($handle === '') {
+                    return [];
+                }
+
+                $label = trim((string) ($field['label'] ?? ''));
+
+                return [$handle => $label !== '' ? $label : $handle];
+            })
+            ->all();
+    }
+
+    protected static function formatSubmissionDataAsHtml(FormSubmission $record): string
+    {
+        $labels = static::getSubmissionFieldLabels($record);
+
+        $rows = collect($record->data ?? [])
+            ->filter(fn (mixed $value): bool => static::normalizeSubmissionValue($value) !== '')
+            ->map(function (mixed $value, string $handle) use ($labels): string {
+                $label = $labels[$handle] ?? $handle;
+                $formattedValue = nl2br(e(static::normalizeSubmissionValue($value)));
+
+                return sprintf(
+                    '<div><span class="font-medium text-gray-700 dark:text-gray-300">%s:</span> <span class="text-gray-900 dark:text-gray-100">%s</span></div>',
+                    e($label),
+                    $formattedValue,
+                );
+            })
+            ->values();
+
+        if ($rows->isEmpty()) {
+            return '<span class="text-gray-500">-</span>';
+        }
+
+        return '<div class="space-y-1">' . $rows->implode('') . '</div>';
+    }
+
+    protected static function formatSubmissionPreviewAsHtml(FormSubmission $record): string
+    {
+        $labels = static::getSubmissionFieldLabels($record);
+
+        $rows = collect($record->data ?? [])
+            ->filter(fn (mixed $value): bool => static::normalizeSubmissionValue($value) !== '')
+            ->take(3)
+            ->map(function (mixed $value, string $handle) use ($labels): string {
+                $label = $labels[$handle] ?? $handle;
+                $normalizedValue = static::normalizeSubmissionValue($value);
+
+                return sprintf(
+                    '<div><span class="font-medium text-gray-700 dark:text-gray-300">%s:</span> <span class="text-gray-900 dark:text-gray-100">%s</span></div>',
+                    e($label),
+                    e(mb_strimwidth($normalizedValue, 0, 90, '...')),
+                );
+            })
+            ->values();
+
+        if ($rows->isEmpty()) {
+            return '<span class="text-gray-500">-</span>';
+        }
+
+        return '<div class="space-y-1">' . $rows->implode('') . '</div>';
+    }
+
+    protected static function normalizeSubmissionValue(mixed $value): string
+    {
+        return match (true) {
+            $value instanceof BackedEnum => (string) $value->value,
+            $value instanceof Htmlable => strip_tags($value->toHtml()),
+            is_bool($value) => $value ? 'Ano' : 'Ne',
+            is_scalar($value) => trim((string) $value),
+            is_array($value) => collect($value)
+                ->filter(fn (mixed $item): bool => is_scalar($item) && trim((string) $item) !== '')
+                ->map(fn (mixed $item): string => (string) $item)
+                ->implode(', '),
+            default => '',
+        };
     }
 }
