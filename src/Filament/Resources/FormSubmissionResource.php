@@ -44,9 +44,53 @@ class FormSubmissionResource extends Resource
         return auth()->user()?->hasPermissionTo('form_submission.view') === true;
     }
 
+    public static function getNavigationBadge(): ?string
+    {
+        $count = static::getUnreadSubmissionsCount();
+
+        return $count > 0 ? (string) $count : null;
+    }
+
+    public static function getNavigationBadgeColor(): string|array|null
+    {
+        return 'warning';
+    }
+
+    public static function getNavigationBadgeTooltip(): ?string
+    {
+        return 'Nepřečtená odeslání';
+    }
+
+    public static function getUnreadSubmissionsCount(): int
+    {
+        return static::getUnreadSubmissionsQuery()->count();
+    }
+
     public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery()->with(['form', 'attachments']);
+        $user = auth()->user();
+
+        if (! $user instanceof User) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        if ($user->hasRole(UserRole::SuperAdmin->value)) {
+            return $query;
+        }
+
+        $userId = $user->getKey();
+
+        return $query->whereHas('form', function (Builder $formQuery) use ($userId): void {
+            $formQuery
+                ->whereJsonContains('recipients', $userId)
+                ->orWhereJsonContains('recipients', (string) $userId);
+        });
+    }
+
+    protected static function getUnreadSubmissionsQuery(): Builder
+    {
+        $query = FormSubmission::query()->where('is_read', false);
         $user = auth()->user();
 
         if (! $user instanceof User) {
