@@ -164,7 +164,7 @@ class FormSubmissionResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('form.title')->label('Zdrojový formulář')->searchable(),
-                TextColumn::make('created_at')->label('Přijato')->since(),
+                TextColumn::make('created_at')->label('Přijato')->isoDateTime('LLL'),
                 TextColumn::make('is_read')
                     ->label('Stav')
                     ->badge()

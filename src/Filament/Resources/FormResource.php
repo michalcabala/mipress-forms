@@ -260,7 +260,7 @@ class FormResource extends Resource
                     ->badge()
                     ->formatStateUsing(fn (bool $state): string => $state ? 'Ano' : 'Ne')
                     ->color(fn (bool $state): string => $state ? 'success' : 'gray'),
-                TextColumn::make('updated_at')->label('Upraveno')->since(),
+                TextColumn::make('updated_at')->label('Upraveno')->isoDateTime('LLL'),
             ])
             ->actions([
                 EditAction::make(),
