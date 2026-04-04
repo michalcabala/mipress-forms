@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace MiPress\Forms\Filament\Pages;
 
-use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Radio;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Section;
@@ -15,13 +15,13 @@ use MiPress\Forms\Models\FormNotificationSetting;
 
 class FormNotificationSettings extends Page
 {
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-bell';
+    protected static string|\BackedEnum|null $navigationIcon = 'fal-bell-ring';
 
     protected static ?string $cluster = FormsCluster::class;
 
-    protected static ?string $navigationLabel = 'Notifikace';
+    protected static ?string $navigationLabel = 'Nastavení notifikací';
 
-    protected static ?string $title = 'Notifikace formulářů';
+    protected static ?string $title = 'Notifikace zpráv z formulářů';
 
     protected static ?int $navigationSort = 40;
 
@@ -59,7 +59,7 @@ class FormNotificationSettings extends Page
             Section::make('Upozornění na nové zprávy')
                 ->description('Zvolte, jak chcete dostávat upozornění na nově odeslané zprávy z formulářů.')
                 ->schema([
-                    Select::make('form_notification_preference')
+                    Radio::make('form_notification_preference')
                         ->label('Způsob upozornění')
                         ->options(FormNotificationPreference::options())
                         ->required(),
