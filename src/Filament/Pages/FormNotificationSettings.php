@@ -28,6 +28,11 @@ class FormNotificationSettings extends Page
 
     public ?string $form_notification_preference = null;
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->hasPermissionTo('form_submission.view') === true;
+    }
+
     public function mount(): void
     {
         $user = auth()->user();

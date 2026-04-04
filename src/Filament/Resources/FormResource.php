@@ -35,13 +35,18 @@ class FormResource extends Resource
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-clipboard-document-list';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Formul\u00e1\u0159e';
+    protected static string|\UnitEnum|null $navigationGroup = 'Formuláře';
 
     protected static ?string $modelLabel = 'Formulář';
 
     protected static ?string $pluralModelLabel = 'Formuláře';
 
     protected static ?int $navigationSort = 30;
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->hasPermissionTo('form.view') === true;
+    }
 
     public static function getEloquentQuery(): Builder
     {

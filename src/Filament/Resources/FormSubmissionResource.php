@@ -30,13 +30,18 @@ class FormSubmissionResource extends Resource
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-inbox-stack';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Formul\u00e1\u0159e';
+    protected static string|\UnitEnum|null $navigationGroup = 'Formuláře';
 
     protected static ?string $modelLabel = 'Odeslání formuláře';
 
     protected static ?string $pluralModelLabel = 'Odeslání formulářů';
 
     protected static ?int $navigationSort = 31;
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->hasPermissionTo('form_submission.view') === true;
+    }
 
     public static function getEloquentQuery(): Builder
     {
@@ -135,7 +140,7 @@ class FormSubmissionResource extends Resource
             ->actions([
                 Action::make('markRead')
                     ->label('Označit jako přečtené')
-                    ->visible(fn (FormSubmission $record): bool => ! $record->is_read)
+                    ->visible(fn (FormSubmission $record): bool => auth()->user()?->hasPermissionTo('form_submission.update') === true && ! $record->is_read)
                     ->action(function (FormSubmission $record): void {
                         $record->update([
                             'is_read' => true,
@@ -145,7 +150,7 @@ class FormSubmissionResource extends Resource
                     }),
                 Action::make('markUnread')
                     ->label('Označit jako nepřečtené')
-                    ->visible(fn (FormSubmission $record): bool => $record->is_read)
+                    ->visible(fn (FormSubmission $record): bool => auth()->user()?->hasPermissionTo('form_submission.update') === true && $record->is_read)
                     ->action(function (FormSubmission $record): void {
                         $record->update([
                             'is_read' => false,
