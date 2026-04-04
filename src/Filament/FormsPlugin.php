@@ -24,6 +24,8 @@ class FormsPlugin implements Plugin
 
     public function register(Panel $panel): void
     {
+        $panel->discoverClusters(in: __DIR__, for: 'MiPress\\Forms\\Filament');
+
         $panel->resources([
             FormResource::class,
             FormSubmissionResource::class,

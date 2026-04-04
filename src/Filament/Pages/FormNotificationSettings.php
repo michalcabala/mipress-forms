@@ -10,13 +10,14 @@ use Filament\Pages\Page;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use MiPress\Forms\Enums\FormNotificationPreference;
+use MiPress\Forms\Filament\Clusters\FormsCluster;
 use MiPress\Forms\Models\FormNotificationSetting;
 
 class FormNotificationSettings extends Page
 {
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-bell';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Formuláře';
+    protected static ?string $cluster = FormsCluster::class;
 
     protected static ?string $navigationLabel = 'Nastavení upozornění';
 

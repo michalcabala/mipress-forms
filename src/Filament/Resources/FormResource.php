@@ -21,6 +21,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 use MiPress\Core\Enums\UserRole;
+use MiPress\Forms\Filament\Clusters\FormsCluster;
 use MiPress\Forms\Enums\FormFieldType;
 use MiPress\Forms\Enums\SpamProtectionMode;
 use MiPress\Forms\Filament\Resources\FormResource\Pages\CreateForm;
@@ -35,7 +36,7 @@ class FormResource extends Resource
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-clipboard-document-list';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Formuláře';
+    protected static ?string $cluster = FormsCluster::class;
 
     protected static ?string $modelLabel = 'Formulář';
 

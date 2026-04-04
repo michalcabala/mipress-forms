@@ -19,6 +19,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use MiPress\Core\Enums\UserRole;
+use MiPress\Forms\Filament\Clusters\FormsCluster;
 use MiPress\Forms\Filament\Resources\FormSubmissionResource\Pages\ListFormSubmissions;
 use MiPress\Forms\Filament\Resources\FormSubmissionResource\Pages\ViewFormSubmission;
 use MiPress\Forms\Models\Form;
@@ -30,7 +31,7 @@ class FormSubmissionResource extends Resource
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-inbox-stack';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Formuláře';
+    protected static ?string $cluster = FormsCluster::class;
 
     protected static ?string $modelLabel = 'Odeslání formuláře';
 
