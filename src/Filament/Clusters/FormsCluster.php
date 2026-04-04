@@ -16,5 +16,5 @@ class FormsCluster extends Cluster
 
     protected static ?string $pluralLabel = 'Formuláře';
 
-    protected static ?int $navigationSort = 30;
+    protected static ?int $navigationSort = 1;
 }
