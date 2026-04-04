@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace MiPress\Forms\Filament\Resources;
 
 use App\Models\User;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -34,7 +38,7 @@ class FormResource extends Resource
 {
     protected static ?string $model = Form::class;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-clipboard-document-list';
+    protected static string|\BackedEnum|null $navigationIcon = 'fal-clipboard-list';
 
     protected static ?string $cluster = FormsCluster::class;
 
@@ -257,6 +261,15 @@ class FormResource extends Resource
                     ->formatStateUsing(fn (bool $state): string => $state ? 'Ano' : 'Ne')
                     ->color(fn (bool $state): string => $state ? 'success' : 'gray'),
                 TextColumn::make('updated_at')->label('Upraveno')->since(),
+            ])
+            ->actions([
+                EditAction::make(),
+                DeleteAction::make(),
+            ])
+            ->bulkActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
             ]);
     }
 
