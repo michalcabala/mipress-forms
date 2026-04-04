@@ -28,6 +28,6 @@ class FormAutoReply extends Mailable
 
     public function content(): Content
     {
-        return new Content(view: 'mipress-forms::mail.auto-reply');
+        return new Content(markdown: 'mipress-forms::mail.auto-reply');
     }
 }

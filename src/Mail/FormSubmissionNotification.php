@@ -30,7 +30,7 @@ class FormSubmissionNotification extends Mailable
 
     public function content(): Content
     {
-        return new Content(view: 'mipress-forms::mail.submission-notification');
+        return new Content(markdown: 'mipress-forms::mail.submission-notification');
     }
 
     /**
