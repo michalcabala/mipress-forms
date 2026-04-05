@@ -65,7 +65,7 @@ class FormSubmissionResource extends Resource
 
     public static function getUnreadSubmissionsCount(): int
     {
-        return static::getUnreadSubmissionsQuery()->count();
+        return once(fn (): int => static::getUnreadSubmissionsQuery()->count());
     }
 
     public static function getEloquentQuery(): Builder
