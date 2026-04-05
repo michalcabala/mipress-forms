@@ -23,7 +23,7 @@ class FormBrick extends Brick
 
     public static function getIcon(): string
     {
-        return 'heroicon-o-envelope';
+        return 'fal-envelope';
     }
 
     public static function toHtml(array $config, ?array $data = null): ?string
