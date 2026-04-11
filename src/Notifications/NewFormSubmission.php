@@ -33,7 +33,7 @@ class NewFormSubmission extends Notification implements ShouldQueue
     {
         return FilamentNotification::make()
             ->title('Nové odeslání formuláře')
-            ->body('Formulář: '.$this->submission->form?->title)
+            ->body('Formulář „'.($this->submission->form?->title ?? 'Bez názvu').'“ přijal nové odeslání #'.$this->submission->getKey().'.')
             ->actions([
                 Action::make('open')
                     ->label('Otevřít')

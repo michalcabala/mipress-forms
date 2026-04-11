@@ -12,6 +12,11 @@ class ListForms extends ListRecords
 {
     protected static string $resource = FormResource::class;
 
+    public function getBreadcrumbs(): array
+    {
+        return [];
+    }
+
     protected function getHeaderActions(): array
     {
         return [

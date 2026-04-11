@@ -10,4 +10,9 @@ use MiPress\Forms\Filament\Resources\FormSubmissionResource;
 class ListFormSubmissions extends ListRecords
 {
     protected static string $resource = FormSubmissionResource::class;
+
+    public function getBreadcrumbs(): array
+    {
+        return [];
+    }
 }

@@ -80,8 +80,11 @@ class FormNotificationSettings extends Page
             ['preference' => $this->form_notification_preference ?? FormNotificationPreference::Both->value],
         );
 
+        $selectedPreference = FormNotificationPreference::options()[$this->form_notification_preference ?? FormNotificationPreference::Both->value] ?? 'E-mail i administrace';
+
         Notification::make()
             ->title('Nastavení uloženo')
+            ->body('Nový způsob upozornění na formuláře: '.$selectedPreference.'.')
             ->success()
             ->send();
     }
