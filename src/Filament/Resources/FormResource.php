@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MiPress\Forms\Filament\Resources;
 
 use App\Models\User;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -25,9 +26,9 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 use MiPress\Core\Enums\UserRole;
-use MiPress\Forms\Filament\Clusters\FormsCluster;
 use MiPress\Forms\Enums\FormFieldType;
 use MiPress\Forms\Enums\SpamProtectionMode;
+use MiPress\Forms\Filament\Clusters\FormsCluster;
 use MiPress\Forms\Filament\Resources\FormResource\Pages\CreateForm;
 use MiPress\Forms\Filament\Resources\FormResource\Pages\EditForm;
 use MiPress\Forms\Filament\Resources\FormResource\Pages\ListForms;
@@ -264,12 +265,14 @@ class FormResource extends Resource
                     ->label('Datum')
                     ->isoDateTime('LLL')
                     ->description(fn ($record): ?string => filled($record->created_at) && filled($record->updated_at) && $record->updated_at->gt($record->created_at)
-                        ? 'Vytvořeno ' . $record->created_at->isoFormat('LLL')
+                        ? 'Vytvořeno '.$record->created_at->isoFormat('LLL')
                         : null),
             ])
             ->actions([
-                EditAction::make(),
-                DeleteAction::make(),
+                ActionGroup::make([
+                    EditAction::make(),
+                    DeleteAction::make(),
+                ]),
             ])
             ->bulkActions([
                 BulkActionGroup::make([

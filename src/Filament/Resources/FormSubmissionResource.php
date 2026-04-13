@@ -7,6 +7,7 @@ namespace MiPress\Forms\Filament\Resources;
 use App\Models\User;
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -182,27 +183,29 @@ class FormSubmissionResource extends Resource
                     ->options(Form::query()->orderBy('title')->pluck('title', 'id')->all()),
             ])
             ->actions([
-                Action::make('markRead')
-                    ->label('Označit jako přečtené')
-                    ->visible(fn (FormSubmission $record): bool => auth()->user()?->hasPermissionTo('form_submission.update') === true && ! $record->is_read)
-                    ->action(function (FormSubmission $record): void {
-                        $record->update([
-                            'is_read' => true,
-                            'read_by' => auth()->id(),
-                            'read_at' => now(),
-                        ]);
-                    }),
-                Action::make('markUnread')
-                    ->label('Označit jako nepřečtené')
-                    ->visible(fn (FormSubmission $record): bool => auth()->user()?->hasPermissionTo('form_submission.update') === true && $record->is_read)
-                    ->action(function (FormSubmission $record): void {
-                        $record->update([
-                            'is_read' => false,
-                            'read_by' => null,
-                            'read_at' => null,
-                        ]);
-                    }),
-                DeleteAction::make(),
+                ActionGroup::make([
+                    Action::make('markRead')
+                        ->label('Označit jako přečtené')
+                        ->visible(fn (FormSubmission $record): bool => auth()->user()?->hasPermissionTo('form_submission.update') === true && ! $record->is_read)
+                        ->action(function (FormSubmission $record): void {
+                            $record->update([
+                                'is_read' => true,
+                                'read_by' => auth()->id(),
+                                'read_at' => now(),
+                            ]);
+                        }),
+                    Action::make('markUnread')
+                        ->label('Označit jako nepřečtené')
+                        ->visible(fn (FormSubmission $record): bool => auth()->user()?->hasPermissionTo('form_submission.update') === true && $record->is_read)
+                        ->action(function (FormSubmission $record): void {
+                            $record->update([
+                                'is_read' => false,
+                                'read_by' => null,
+                                'read_at' => null,
+                            ]);
+                        }),
+                    DeleteAction::make(),
+                ]),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
@@ -272,7 +275,7 @@ class FormSubmissionResource extends Resource
             return '<span class="text-gray-500">-</span>';
         }
 
-        return '<div class="space-y-1">' . $rows->implode('') . '</div>';
+        return '<div class="space-y-1">'.$rows->implode('').'</div>';
     }
 
     protected static function formatSubmissionPreviewAsHtml(FormSubmission $record): string
@@ -298,7 +301,7 @@ class FormSubmissionResource extends Resource
             return '<span class="text-gray-500">-</span>';
         }
 
-        return '<div class="space-y-1">' . $rows->implode('') . '</div>';
+        return '<div class="space-y-1">'.$rows->implode('').'</div>';
     }
 
     protected static function normalizeSubmissionValue(mixed $value): string
