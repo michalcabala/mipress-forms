@@ -16,13 +16,14 @@ class FormsServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        $this->loadTranslationsFrom(__DIR__.'/../lang', 'mipress-forms');
+
         // Mason block registry for downstream integrations.
         $this->app->singleton('mipress.forms.mason.bricks', fn (): array => [FormBrick::class]);
     }
 
     public function boot(): void
     {
-        $this->loadTranslationsFrom(__DIR__.'/../lang', 'mipress-forms');
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'mipress-forms');
         $this->loadRoutesFrom(__DIR__.'/../routes/web.php');

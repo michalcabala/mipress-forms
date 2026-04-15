@@ -17,7 +17,7 @@ class ViewFormSubmission extends ViewRecord
     {
         return [
             Action::make('markRead')
-                ->label('Označit jako přečtené')
+                ->label(__('mipress-forms::admin.resources.form_submission.actions.mark_read'))
                 ->visible(fn (): bool => ! $this->record->is_read)
                 ->action(function (): void {
                     $this->record->update([
@@ -27,7 +27,7 @@ class ViewFormSubmission extends ViewRecord
                     ]);
                 }),
             Action::make('markUnread')
-                ->label('Označit jako nepřečtené')
+                ->label(__('mipress-forms::admin.resources.form_submission.actions.mark_unread'))
                 ->visible(fn (): bool => (bool) $this->record->is_read)
                 ->action(function (): void {
                     $this->record->update([
