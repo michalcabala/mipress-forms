@@ -19,15 +19,25 @@ class FormNotificationSettings extends Page
 
     protected static ?string $cluster = FormsCluster::class;
 
-    protected static ?string $navigationLabel = 'Nastavení notifikací';
+    protected static ?string $navigationLabel = null;
 
-    protected static ?string $title = 'Notifikace zpráv z formulářů';
+    protected static ?string $title = null;
 
     protected static ?int $navigationSort = 40;
 
     protected string $view = 'mipress-forms::filament.pages.form-notification-settings';
 
     public ?string $form_notification_preference = null;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('mipress-forms::admin.pages.form_notification_settings.navigation_label');
+    }
+
+    public function getTitle(): string
+    {
+        return __('mipress-forms::admin.pages.form_notification_settings.title');
+    }
 
     public static function canAccess(): bool
     {
@@ -56,11 +66,11 @@ class FormNotificationSettings extends Page
     public function form(Schema $schema): Schema
     {
         return $schema->components([
-            Section::make('Upozornění na nové zprávy')
-                ->description('Zvolte, jak chcete dostávat upozornění na nově odeslané zprávy z formulářů.')
+            Section::make(__('mipress-forms::admin.pages.form_notification_settings.section'))
+                ->description(__('mipress-forms::admin.pages.form_notification_settings.description'))
                 ->schema([
                     Radio::make('form_notification_preference')
-                        ->label('Způsob upozornění')
+                        ->label(__('mipress-forms::admin.pages.form_notification_settings.field'))
                         ->options(FormNotificationPreference::options())
                         ->required(),
                 ]),
@@ -83,8 +93,8 @@ class FormNotificationSettings extends Page
         $selectedPreference = FormNotificationPreference::options()[$this->form_notification_preference ?? FormNotificationPreference::Both->value] ?? 'E-mail i administrace';
 
         Notification::make()
-            ->title('Nastavení uloženo')
-            ->body('Nový způsob upozornění na formuláře: '.$selectedPreference.'.')
+            ->title(__('mipress-forms::admin.pages.form_notification_settings.saved_title'))
+            ->body(__('mipress-forms::admin.pages.form_notification_settings.saved_body', ['preference' => $selectedPreference]))
             ->success()
             ->send();
     }

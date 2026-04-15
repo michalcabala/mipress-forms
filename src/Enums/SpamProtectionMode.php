@@ -13,9 +13,9 @@ enum SpamProtectionMode: string
     public function label(): string
     {
         return match ($this) {
-            self::Honeypot => 'Honeypot',
-            self::Recaptcha => 'reCAPTCHA v3',
-            self::Both => 'Honeypot + reCAPTCHA v3',
+            self::Honeypot => __('mipress-forms::admin.enums.spam_protection_mode.honeypot'),
+            self::Recaptcha => __('mipress-forms::admin.enums.spam_protection_mode.recaptcha'),
+            self::Both => __('mipress-forms::admin.enums.spam_protection_mode.both'),
         };
     }
 

@@ -13,12 +13,7 @@ enum FormNotificationPreference: string
 
     public function label(): string
     {
-        return match ($this) {
-            self::Email => 'Pouze e-mail',
-            self::Database => 'Pouze notifikace v adminu',
-            self::Both => 'E-mail i notifikace v adminu',
-            self::None => 'Žádné upozornění',
-        };
+        return __('mipress-forms::admin.enums.form_notification_preference.'.$this->value);
     }
 
     /**

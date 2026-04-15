@@ -22,6 +22,7 @@ class FormsServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        $this->loadTranslationsFrom(__DIR__.'/../lang', 'mipress-forms');
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'mipress-forms');
         $this->loadRoutesFrom(__DIR__.'/../routes/web.php');

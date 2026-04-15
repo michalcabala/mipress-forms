@@ -43,11 +43,21 @@ class FormResource extends Resource
 
     protected static ?string $cluster = FormsCluster::class;
 
-    protected static ?string $modelLabel = 'Formulář';
+    protected static ?string $modelLabel = null;
 
-    protected static ?string $pluralModelLabel = 'Formuláře';
+    protected static ?string $pluralModelLabel = null;
 
     protected static ?int $navigationSort = 30;
+
+    public static function getModelLabel(): string
+    {
+        return __('mipress-forms::admin.resources.form.model_label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('mipress-forms::admin.resources.form.plural_model_label');
+    }
 
     public static function canAccess(): bool
     {
@@ -64,18 +74,18 @@ class FormResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            Section::make('Základní nastavení')
+            Section::make(__('mipress-forms::admin.resources.form.sections.basic_settings'))
                 ->schema([
                     Grid::make(2)
                         ->schema([
                             Select::make('template')
-                                ->label('Začít ze šablony')
+                                ->label(__('mipress-forms::admin.resources.form.fields.template'))
                                 ->visibleOn('create')
                                 ->dehydrated(false)
                                 ->default('none')
                                 ->options([
-                                    'none' => 'Prázdný formulář',
-                                    'contact' => 'Kontaktní formulář',
+                                    'none' => __('mipress-forms::admin.resources.form.options.template.none'),
+                                    'contact' => __('mipress-forms::admin.resources.form.options.template.contact'),
                                 ])
                                 ->live()
                                 ->afterStateUpdated(function (?string $state, callable $set): void {
@@ -85,10 +95,10 @@ class FormResource extends Resource
                                     });
                                 }),
                             Toggle::make('is_active')
-                                ->label('Aktivní')
+                                ->label(__('mipress-forms::admin.resources.form.fields.is_active'))
                                 ->default(true),
                             TextInput::make('title')
-                                ->label('Název')
+                                ->label(__('mipress-forms::admin.resources.form.fields.title'))
                                 ->required()
                                 ->maxLength(255)
                                 ->live(onBlur: true)
@@ -100,7 +110,7 @@ class FormResource extends Resource
                                     $set('handle', Str::slug($state));
                                 }),
                             TextInput::make('handle')
-                                ->label('Identifikátor')
+                                ->label(__('mipress-forms::admin.resources.form.fields.handle'))
                                 ->required()
                                 ->maxLength(255)
                                 ->unique(ignoreRecord: true)
@@ -108,37 +118,37 @@ class FormResource extends Resource
                                 ->dehydrated(static fn (string $operation): bool => $operation === 'create'),
                         ]),
                     Textarea::make('description')
-                        ->label('Popis')
+                        ->label(__('mipress-forms::admin.resources.form.fields.description'))
                         ->rows(3),
                 ]),
 
-            Section::make('Pole formuláře')
+            Section::make(__('mipress-forms::admin.resources.form.sections.fields'))
                 ->schema([
                     Repeater::make('fields')
-                        ->label('Pole')
+                        ->label(__('mipress-forms::admin.resources.form.fields.form_fields'))
                         ->schema([
                             Grid::make(2)
                                 ->schema([
                                     TextInput::make('handle')
-                                        ->label('Identifikátor')
+                                        ->label(__('mipress-forms::admin.resources.form.fields.handle'))
                                         ->required(),
                                     TextInput::make('label')
-                                        ->label('Popisek')
+                                        ->label(__('mipress-forms::admin.resources.form.fields.label'))
                                         ->required(),
                                     Select::make('type')
-                                        ->label('Typ')
+                                        ->label(__('mipress-forms::admin.resources.form.fields.type'))
                                         ->options(FormFieldType::options())
                                         ->live()
                                         ->required(),
                                     Toggle::make('required')
-                                        ->label('Povinné')
+                                        ->label(__('mipress-forms::admin.resources.form.fields.required'))
                                         ->default(false),
                                     TextInput::make('order')
-                                        ->label('Pořadí')
+                                        ->label(__('mipress-forms::admin.resources.form.fields.order'))
                                         ->numeric()
                                         ->default(0),
                                     TextInput::make('config.placeholder')
-                                        ->label('Zástupný text')
+                                        ->label(__('mipress-forms::admin.resources.form.fields.placeholder'))
                                         ->visible(fn (Get $get): bool => in_array((string) $get('type'), [
                                             FormFieldType::Text->value,
                                             FormFieldType::Email->value,
@@ -147,28 +157,28 @@ class FormResource extends Resource
                                             FormFieldType::Select->value,
                                         ], true)),
                                     TextInput::make('config.max_length')
-                                        ->label('Max délka')
+                                        ->label(__('mipress-forms::admin.resources.form.fields.max_length'))
                                         ->numeric()
                                         ->visible(fn (Get $get): bool => (string) $get('type') === FormFieldType::Text->value),
                                     TextInput::make('config.rows')
-                                        ->label('Počet řádků')
+                                        ->label(__('mipress-forms::admin.resources.form.fields.rows'))
                                         ->numeric()
                                         ->visible(fn (Get $get): bool => (string) $get('type') === FormFieldType::Textarea->value),
                                     TextInput::make('config.max_size_mb')
-                                        ->label('Max velikost (MB)')
+                                        ->label(__('mipress-forms::admin.resources.form.fields.max_size_mb'))
                                         ->numeric()
                                         ->visible(fn (Get $get): bool => (string) $get('type') === FormFieldType::File->value),
                                     TextInput::make('config.accepted')
-                                        ->label('Povolené přípony')
-                                        ->helperText('.pdf,.jpg,.png')
+                                        ->label(__('mipress-forms::admin.resources.form.fields.accepted'))
+                                        ->helperText(__('mipress-forms::admin.resources.form.help.accepted'))
                                         ->visible(fn (Get $get): bool => (string) $get('type') === FormFieldType::File->value),
                                     TextInput::make('config.value')
-                                        ->label('Skrytá hodnota')
+                                        ->label(__('mipress-forms::admin.resources.form.fields.hidden_value'))
                                         ->visible(fn (Get $get): bool => (string) $get('type') === FormFieldType::Hidden->value),
                                     KeyValue::make('config.options')
-                                        ->label('Možnosti')
-                                        ->keyLabel('Klíč')
-                                        ->valueLabel('Popisek')
+                                        ->label(__('mipress-forms::admin.resources.form.fields.options'))
+                                        ->keyLabel(__('mipress-forms::admin.resources.form.key_value.key_label'))
+                                        ->valueLabel(__('mipress-forms::admin.resources.form.key_value.value_label'))
                                         ->visible(fn (Get $get): bool => in_array((string) $get('type'), [
                                             FormFieldType::Select->value,
                                             FormFieldType::Radio->value,
@@ -181,10 +191,10 @@ class FormResource extends Resource
                         ->columnSpanFull(),
                 ]),
 
-            Section::make('Příjemci')
+            Section::make(__('mipress-forms::admin.resources.form.sections.recipients'))
                 ->schema([
                     Select::make('recipients')
-                        ->label('Upozornit uživatele')
+                        ->label(__('mipress-forms::admin.resources.form.fields.notify_users'))
                         ->multiple()
                         ->searchable()
                         ->options(fn (): array => User::query()
@@ -198,22 +208,22 @@ class FormResource extends Resource
                             ->all()),
                 ]),
 
-            Section::make('Ochrana proti spamu')
+            Section::make(__('mipress-forms::admin.resources.form.sections.spam_protection'))
                 ->schema([
                     Select::make('spam_protection')
-                        ->label('Režim')
+                        ->label(__('mipress-forms::admin.resources.form.fields.spam_mode'))
                         ->options(SpamProtectionMode::options())
                         ->default(SpamProtectionMode::Honeypot->value)
                         ->live()
                         ->required(),
                     TextInput::make('recaptcha_site_key')
-                        ->label('reCAPTCHA veřejný klíč')
+                        ->label(__('mipress-forms::admin.resources.form.fields.recaptcha_site_key'))
                         ->visible(fn (Get $get): bool => in_array((string) $get('spam_protection'), [
                             SpamProtectionMode::Recaptcha->value,
                             SpamProtectionMode::Both->value,
                         ], true)),
                     TextInput::make('recaptcha_secret_key')
-                        ->label('reCAPTCHA tajný klíč')
+                        ->label(__('mipress-forms::admin.resources.form.fields.recaptcha_secret_key'))
                         ->password()
                         ->revealable()
                         ->visible(fn (Get $get): bool => in_array((string) $get('spam_protection'), [
@@ -222,25 +232,25 @@ class FormResource extends Resource
                         ], true)),
                 ]),
 
-            Section::make('Automatická odpověď')
+            Section::make(__('mipress-forms::admin.resources.form.sections.auto_reply'))
                 ->schema([
                     Toggle::make('auto_reply_enabled')
-                        ->label('Zapnout automatickou odpověď')
+                        ->label(__('mipress-forms::admin.resources.form.fields.auto_reply_enabled'))
                         ->live(),
                     TextInput::make('auto_reply_subject')
-                        ->label('Předmět')
+                        ->label(__('mipress-forms::admin.resources.form.fields.auto_reply_subject'))
                         ->visible(fn (Get $get): bool => (bool) $get('auto_reply_enabled')),
                     Textarea::make('auto_reply_body')
-                        ->label('Text zprávy')
+                        ->label(__('mipress-forms::admin.resources.form.fields.auto_reply_body'))
                         ->rows(5)
                         ->visible(fn (Get $get): bool => (bool) $get('auto_reply_enabled')),
                 ]),
 
-            Section::make('Potvrzovací zpráva')
+            Section::make(__('mipress-forms::admin.resources.form.sections.success_message'))
                 ->schema([
                     Textarea::make('success_message')
-                        ->label('Zpráva po odeslání')
-                        ->default('Děkujeme, formulář byl odeslán.')
+                        ->label(__('mipress-forms::admin.resources.form.fields.success_message'))
+                        ->default(__('mipress-forms::admin.resources.form.defaults.success_message'))
                         ->required(),
                 ]),
         ]);
@@ -250,22 +260,22 @@ class FormResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('title')->label('Název')->searchable(),
-                TextColumn::make('handle')->label('Identifikátor')->searchable(),
+                TextColumn::make('title')->label(__('mipress-forms::admin.resources.form.table.columns.title'))->searchable(),
+                TextColumn::make('handle')->label(__('mipress-forms::admin.resources.form.table.columns.handle'))->searchable(),
                 TextColumn::make('unread_submissions_count')
-                    ->label('Nepřečtené zprávy')
+                    ->label(__('mipress-forms::admin.resources.form.table.columns.unread_submissions'))
                     ->badge()
                     ->color('warning'),
                 TextColumn::make('is_active')
-                    ->label('Aktivní')
+                    ->label(__('mipress-forms::admin.resources.form.table.columns.is_active'))
                     ->badge()
-                    ->formatStateUsing(fn (bool $state): string => $state ? 'Ano' : 'Ne')
+                    ->formatStateUsing(fn (bool $state): string => $state ? __('mipress-forms::admin.common.yes') : __('mipress-forms::admin.common.no'))
                     ->color(fn (bool $state): string => $state ? 'success' : 'gray'),
                 TextColumn::make('updated_at')
-                    ->label('Datum')
+                    ->label(__('mipress-forms::admin.resources.form.table.columns.updated_at'))
                     ->isoDateTime('LLL')
                     ->description(fn ($record): ?string => filled($record->created_at) && filled($record->updated_at) && $record->updated_at->gt($record->created_at)
-                        ? 'Vytvořeno '.$record->created_at->isoFormat('LLL')
+                        ? __('mipress-forms::admin.common.created_at_description', ['date' => $record->created_at->isoFormat('LLL')])
                         : null),
             ])
             ->actions([

@@ -36,11 +36,21 @@ class FormSubmissionResource extends Resource
 
     protected static ?string $cluster = FormsCluster::class;
 
-    protected static ?string $modelLabel = 'Odeslaná zpráva';
+    protected static ?string $modelLabel = null;
 
-    protected static ?string $pluralModelLabel = 'Odeslané zprávy';
+    protected static ?string $pluralModelLabel = null;
 
     protected static ?int $navigationSort = 31;
+
+    public static function getModelLabel(): string
+    {
+        return __('mipress-forms::admin.resources.form_submission.model_label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('mipress-forms::admin.resources.form_submission.plural_model_label');
+    }
 
     public static function canAccess(): bool
     {
@@ -61,7 +71,7 @@ class FormSubmissionResource extends Resource
 
     public static function getNavigationBadgeTooltip(): ?string
     {
-        return 'Nepřečtené zprávy';
+        return __('mipress-forms::admin.resources.form_submission.unread_tooltip');
     }
 
     public static function getUnreadSubmissionsCount(): int
@@ -117,7 +127,7 @@ class FormSubmissionResource extends Resource
     {
         return $schema->components([
             Select::make('form_id')
-                ->label('Zdrojový formulář')
+                ->label(__('mipress-forms::admin.resources.form_submission.fields.source_form'))
                 ->options(Form::query()->orderBy('title')->pluck('title', 'id')->all())
                 ->disabled(),
         ]);
@@ -127,27 +137,27 @@ class FormSubmissionResource extends Resource
     {
         return $schema->components([
             TextEntry::make('form.title')
-                ->label('Zdrojový formulář'),
+                ->label(__('mipress-forms::admin.resources.form_submission.fields.source_form')),
             TextEntry::make('created_at')
-                ->label('Přijato')
+                ->label(__('mipress-forms::admin.resources.form_submission.fields.received_at'))
                 ->since(),
             TextEntry::make('is_read')
-                ->label('Stav')
-                ->formatStateUsing(fn (bool $state): string => $state ? 'Přečteno' : 'Nepřečteno'),
+                ->label(__('mipress-forms::admin.resources.form_submission.fields.status'))
+                ->formatStateUsing(fn (bool $state): string => $state ? __('mipress-forms::admin.resources.form_submission.states.read') : __('mipress-forms::admin.resources.form_submission.states.unread')),
             TextEntry::make('ip_address')
-                ->label('IP adresa')
-                ->placeholder('-'),
+                ->label(__('mipress-forms::admin.resources.form_submission.fields.ip_address'))
+                ->placeholder(__('mipress-forms::admin.common.empty')),
             TextEntry::make('user_agent')
-                ->label('Uživatelský agent')
-                ->placeholder('-')
+                ->label(__('mipress-forms::admin.resources.form_submission.fields.user_agent'))
+                ->placeholder(__('mipress-forms::admin.common.empty'))
                 ->columnSpanFull(),
             TextEntry::make('submission_data')
-                ->label('Obsah zprávy')
+                ->label(__('mipress-forms::admin.resources.form_submission.fields.message_content'))
                 ->state(fn (FormSubmission $record): string => static::formatSubmissionDataAsHtml($record))
                 ->html()
                 ->columnSpanFull(),
             TextEntry::make('attachments_links')
-                ->label('Přílohy')
+                ->label(__('mipress-forms::admin.resources.form_submission.fields.attachments'))
                 ->state(fn (FormSubmission $record): string => $record->attachments
                     ->map(fn ($attachment): string => sprintf(
                         '<a href="%s" class="text-primary-600 underline">%s</a>',
@@ -164,28 +174,28 @@ class FormSubmissionResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('form.title')->label('Zdrojový formulář')->searchable(),
-                TextColumn::make('created_at')->label('Přijato')->isoDateTime('LLL'),
+                TextColumn::make('form.title')->label(__('mipress-forms::admin.resources.form_submission.fields.source_form'))->searchable(),
+                TextColumn::make('created_at')->label(__('mipress-forms::admin.resources.form_submission.fields.received_at'))->isoDateTime('LLL'),
                 TextColumn::make('is_read')
-                    ->label('Stav')
+                    ->label(__('mipress-forms::admin.resources.form_submission.fields.status'))
                     ->badge()
-                    ->formatStateUsing(fn (bool $state): string => $state ? 'Přečteno' : 'Nepřečteno')
+                    ->formatStateUsing(fn (bool $state): string => $state ? __('mipress-forms::admin.resources.form_submission.states.read') : __('mipress-forms::admin.resources.form_submission.states.unread'))
                     ->color(fn (bool $state): string => $state ? 'success' : 'warning'),
                 TextColumn::make('summary')
-                    ->label('Náhled zprávy')
+                    ->label(__('mipress-forms::admin.resources.form_submission.fields.message_preview'))
                     ->state(fn (FormSubmission $record): string => static::formatSubmissionPreviewAsHtml($record))
                     ->html()
                     ->wrap(),
             ])
             ->filters([
                 SelectFilter::make('form_id')
-                    ->label('Zdrojový formulář')
+                    ->label(__('mipress-forms::admin.resources.form_submission.fields.source_form'))
                     ->options(Form::query()->orderBy('title')->pluck('title', 'id')->all()),
             ])
             ->actions([
                 ActionGroup::make([
                     Action::make('markRead')
-                        ->label('Označit jako přečtené')
+                        ->label(__('mipress-forms::admin.resources.form_submission.actions.mark_read'))
                         ->visible(fn (FormSubmission $record): bool => auth()->user()?->hasPermissionTo('form_submission.update') === true && ! $record->is_read)
                         ->action(function (FormSubmission $record): void {
                             $record->update([
@@ -195,7 +205,7 @@ class FormSubmissionResource extends Resource
                             ]);
                         }),
                     Action::make('markUnread')
-                        ->label('Označit jako nepřečtené')
+                        ->label(__('mipress-forms::admin.resources.form_submission.actions.mark_unread'))
                         ->visible(fn (FormSubmission $record): bool => auth()->user()?->hasPermissionTo('form_submission.update') === true && $record->is_read)
                         ->action(function (FormSubmission $record): void {
                             $record->update([
@@ -210,7 +220,7 @@ class FormSubmissionResource extends Resource
             ->bulkActions([
                 BulkActionGroup::make([
                     BulkAction::make('markRead')
-                        ->label('Označit jako přečtené')
+                        ->label(__('mipress-forms::admin.resources.form_submission.actions.mark_read'))
                         ->action(function ($records): void {
                             FormSubmission::query()
                                 ->whereIn('id', $records->pluck('id'))
@@ -272,7 +282,7 @@ class FormSubmissionResource extends Resource
             ->values();
 
         if ($rows->isEmpty()) {
-            return '<span class="text-gray-500">-</span>';
+            return '<span class="text-gray-500">'.e(__('mipress-forms::admin.common.empty')).'</span>';
         }
 
         return '<div class="space-y-1">'.$rows->implode('').'</div>';
@@ -298,7 +308,7 @@ class FormSubmissionResource extends Resource
             ->values();
 
         if ($rows->isEmpty()) {
-            return '<span class="text-gray-500">-</span>';
+            return '<span class="text-gray-500">'.e(__('mipress-forms::admin.common.empty')).'</span>';
         }
 
         return '<div class="space-y-1">'.$rows->implode('').'</div>';
@@ -309,7 +319,7 @@ class FormSubmissionResource extends Resource
         return match (true) {
             $value instanceof BackedEnum => (string) $value->value,
             $value instanceof Htmlable => strip_tags($value->toHtml()),
-            is_bool($value) => $value ? 'Ano' : 'Ne',
+            is_bool($value) => $value ? __('mipress-forms::admin.common.yes') : __('mipress-forms::admin.common.no'),
             is_scalar($value) => trim((string) $value),
             is_array($value) => collect($value)
                 ->filter(fn (mixed $item): bool => is_scalar($item) && trim((string) $item) !== '')

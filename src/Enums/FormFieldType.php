@@ -19,15 +19,15 @@ enum FormFieldType: string
     public function label(): string
     {
         return match ($this) {
-            self::Text => 'Text',
-            self::Email => 'Email',
-            self::Phone => 'Telefon',
-            self::Textarea => 'Textová oblast',
-            self::Select => 'Výběr',
-            self::Checkbox => 'Zaškrtávací pole',
-            self::Radio => 'Přepínač',
-            self::File => 'Soubor',
-            self::Hidden => 'Skryté pole',
+            self::Text => __('mipress-forms::admin.enums.form_field_type.text'),
+            self::Email => __('mipress-forms::admin.enums.form_field_type.email'),
+            self::Phone => __('mipress-forms::admin.enums.form_field_type.phone'),
+            self::Textarea => __('mipress-forms::admin.enums.form_field_type.textarea'),
+            self::Select => __('mipress-forms::admin.enums.form_field_type.select'),
+            self::Checkbox => __('mipress-forms::admin.enums.form_field_type.checkbox'),
+            self::Radio => __('mipress-forms::admin.enums.form_field_type.radio'),
+            self::File => __('mipress-forms::admin.enums.form_field_type.file'),
+            self::Hidden => __('mipress-forms::admin.enums.form_field_type.hidden'),
         };
     }
 
