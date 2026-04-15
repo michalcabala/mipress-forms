@@ -141,4 +141,24 @@ return [
             'saved_body' => 'New form notification preference: :preference.',
         ],
     ],
+    'notifications' => [
+        'new_submission' => [
+            'title' => 'New form submission',
+            'body' => 'Form ":title" received a new submission #:id.',
+            'untitled_form' => 'Untitled',
+            'actions' => [
+                'open' => 'Open',
+            ],
+        ],
+    ],
+    'mason' => [
+        'bricks' => [
+            'form' => [
+                'label' => 'Form',
+                'fields' => [
+                    'form_handle' => 'Form',
+                ],
+            ],
+        ],
+    ],
 ];

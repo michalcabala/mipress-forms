@@ -18,7 +18,7 @@ class FormBrick extends Brick
 
     public static function getLabel(): string
     {
-        return 'Formulář';
+        return __('mipress-forms::admin.mason.bricks.form.label');
     }
 
     public static function getIcon(): string
@@ -39,7 +39,7 @@ class FormBrick extends Brick
             ->slideOver()
             ->schema([
                 Select::make('form_handle')
-                    ->label('Formulář')
+                    ->label(__('mipress-forms::admin.mason.bricks.form.fields.form_handle'))
                     ->options(fn (): array => Form::query()
                         ->where('is_active', true)
                         ->orderBy('title')

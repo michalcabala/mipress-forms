@@ -141,4 +141,24 @@ return [
             'saved_body' => 'Nový způsob upozornění na formuláře: :preference.',
         ],
     ],
+    'notifications' => [
+        'new_submission' => [
+            'title' => 'Nové odeslání formuláře',
+            'body' => 'Formulář „:title“ přijal nové odeslání #:id.',
+            'untitled_form' => 'Bez názvu',
+            'actions' => [
+                'open' => 'Otevřít',
+            ],
+        ],
+    ],
+    'mason' => [
+        'bricks' => [
+            'form' => [
+                'label' => 'Formulář',
+                'fields' => [
+                    'form_handle' => 'Formulář',
+                ],
+            ],
+        ],
+    ],
 ];

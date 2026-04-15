@@ -32,11 +32,14 @@ class NewFormSubmission extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         return FilamentNotification::make()
-            ->title('Nové odeslání formuláře')
-            ->body('Formulář „'.($this->submission->form?->title ?? 'Bez názvu').'“ přijal nové odeslání #'.$this->submission->getKey().'.')
+            ->title(__('mipress-forms::admin.notifications.new_submission.title'))
+            ->body(__('mipress-forms::admin.notifications.new_submission.body', [
+                'title' => $this->submission->form?->title ?? __('mipress-forms::admin.notifications.new_submission.untitled_form'),
+                'id' => $this->submission->getKey(),
+            ]))
             ->actions([
                 Action::make('open')
-                    ->label('Otevřít')
+                    ->label(__('mipress-forms::admin.notifications.new_submission.actions.open'))
                     ->url(FormSubmissionResource::getUrl('view', ['record' => $this->submission]))
                     ->markAsRead(),
             ])
