@@ -6,7 +6,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.3",
-        "mipress/core": "@dev"
+        "mipress/core": "^0.10.6"
     },
     "autoload": {
         "psr-4": {
@@ -20,6 +20,6 @@
             ]
         }
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "prefer-stable": true
 }
